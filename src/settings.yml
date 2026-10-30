@@ -10,6 +10,8 @@ dark_mode: 'no'
 static_data: ''
 polling_verb: get
 framework_version: latest
+# Plugin ID on trmnl.com, written by the first `trmnlp push`.
+id: 524760
 # One URL: the Macro Week server (server/) returns the whole week pre-built.
 # Replace the host with your deployed app's URL.
 polling_url: https://macro-week.fly.dev/week?scope={{ release_scope }}
