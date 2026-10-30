@@ -13,8 +13,8 @@ jobs:
     name: Server tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - run: npm test
@@ -24,7 +24,7 @@ jobs:
     name: Plugin lint + render (trmnlp)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '4.0'
@@ -47,7 +47,7 @@ jobs:
       - if: env.FLY_API_TOKEN == ''
         run: echo "::warning::FLY_API_TOKEN secret not set; skipping deploy (see README)"
       - if: env.FLY_API_TOKEN != ''
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - if: env.FLY_API_TOKEN != ''
         uses: superfly/flyctl-actions/setup-flyctl@1.5
       - if: env.FLY_API_TOKEN != ''
