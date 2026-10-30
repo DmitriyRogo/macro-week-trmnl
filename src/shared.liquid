@@ -31,7 +31,7 @@
   .mw-day__head { display: flex; align-items: baseline; justify-content: space-between; padding: 3px 8px; border-bottom: 2px solid #000; }
   .mw-day--today .mw-day__head { background: #000; color: #fff; }
   .mw-day--past .mw-day__head { border-bottom-style: dashed; }
-  .mw-day__body { display: flex; flex-direction: column; gap: 6px; padding: 6px 7px; overflow: hidden; }
+  .mw-day__body { display: flex; flex-direction: column; gap: 4px; padding: 6px 7px; overflow: hidden; }
   .mw-sect { display: flex; align-items: center; gap: 5px; margin-top: 1px; }
   .mw-sect::after { content: ""; flex: 1; border-top: 2px dotted #000; }
   .mw-ev__top { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; }
@@ -61,9 +61,13 @@
     next          first event still to come, with when ('Today 8:30', 'Tomorrow AMC', 'Thu 2:00')
     latest[]      released events with results, most recent first
     upcoming[]    events still to come, nearest first
-    macro_ok / earnings_ok   false when that upstream source is unavailable
-  Event: kind (macro|fomc|earn), label, time, major, sep, eps (estimate), status (past|future),
-         result { value, unit, prev, dir (up|down|flat) } or null, verdict (beat|miss|inline) for earnings.
+    macro_ok / earnings_ok / auctions_ok   false when that upstream source is unavailable
+  Event: kind (macro|fomc|minutes|ism|auction|earn), label, time, major, sep, eps (estimate), status (past|future),
+         no_result (minutes, ISM: never get a result), verdict (beat|miss|inline) for earnings,
+         result { value, unit, prev, dir (up|down|flat) } or null, plus
+           macro:   extra { label, value }   second number (core CPI / core PCE / unemployment)
+           earn:    rev { value, verdict }   revenue vs estimate
+           auction: cover                     bid-to-cover, e.g. '2.46x'
   Write the template / endtemplate tags without "-" whitespace trimming: TRMNL's parser misses a
   trimmed endtemplate and swallows the rest of the layout, leaving a blank screen.
 {%- endcomment -%}
@@ -80,12 +84,17 @@
       {%- if ev.kind == "earn" -%}
         <span class="mw-b">{{ ev.result.value }}</span>
         {%- if ev.verdict == "beat" %}<span class="mw-chip mw-chip--fill">BEAT</span>{% elsif ev.verdict == "miss" %}<span class="mw-chip">MISS</span>{% elsif ev.verdict == "inline" %}<span class="mw-chip mw-chip--dash">INLINE</span>{% endif -%}
+        {%- if ev.result.rev -%}<span class="mw-s">rev {{ ev.result.rev.value }}{% if ev.result.rev.verdict %} {{ ev.result.rev.verdict }}{% endif %}</span>{%- endif -%}
       {%- elsif ev.kind == "fomc" -%}
         <span class="mw-chip{% if ev.result.dir != 'flat' %} mw-chip--fill{% endif %}">{{ ev.result.value }}</span><span class="mw-s">{{ ev.result.unit }}</span>
+      {%- elsif ev.kind == "auction" -%}
+        <span class="mw-b">{{ ev.result.value }}</span>{%- if ev.result.cover -%}<span class="mw-s">{{ ev.result.cover }} cover</span>{%- endif -%}
       {%- else -%}
         <span class="mw-b">{{ ev.result.value }}</span><span class="mw-dir mw-dir--{{ ev.result.dir }}"></span><span class="mw-s">prev {{ ev.result.prev }}</span>
+        {%- if ev.result.extra -%}<span class="mw-s">{{ ev.result.extra.label }} {{ ev.result.extra.value }}</span>{%- endif -%}
       {%- endif -%}
     </div>
+  {%- elsif ev.no_result -%}
   {%- elsif ev.status == "past" -%}
     <div class="mw-s mw-note">awaiting data</div>
   {%- elsif ev.kind == "earn" and ev.eps -%}
@@ -108,6 +117,8 @@
         {%- if ev.verdict == "beat" %}<span class="mw-chip mw-chip--fill">BEAT</span>{% elsif ev.verdict == "miss" %}<span class="mw-chip">MISS</span>{% elsif ev.verdict == "inline" %}<span class="mw-chip mw-chip--dash">INLINE</span>{% endif -%}
       {%- elsif ev.kind == "fomc" -%}
         <span class="mw-chip{% if ev.result.dir != 'flat' %} mw-chip--fill{% endif %}">{{ ev.result.value }}</span>
+      {%- elsif ev.kind == "auction" -%}
+        <span class="mw-b">{{ ev.result.value }}</span>
       {%- else -%}
         <span class="mw-b">{{ ev.result.value }}</span><span class="mw-dir mw-dir--{{ ev.result.dir }}"></span>
       {%- endif -%}

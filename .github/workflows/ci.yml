@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  server:
+    name: Server tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+        working-directory: server
+
+  plugin:
+    name: Plugin lint + render (trmnlp)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+      - run: gem install trmnl_preview -v 0.30.4 --no-document
+      # Renders every layout with TRMNL's own Liquid engine (polls the live server for data).
+      # A local Liquid shim once accepted markup that TRMNL rendered blank; this catches that.
+      - run: trmnlp lint
+      - run: trmnlp build
+      - run: node .github/scripts/check-build.mjs _build
+
+  deploy:
+    name: Deploy server to Fly.io
+    needs: [server, plugin]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency: deploy
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - if: env.FLY_API_TOKEN == ''
+        run: echo "::warning::FLY_API_TOKEN secret not set; skipping deploy (see README)"
+      - if: env.FLY_API_TOKEN != ''
+        uses: actions/checkout@v4
+      - if: env.FLY_API_TOKEN != ''
+        uses: superfly/flyctl-actions/setup-flyctl@1.5
+      - if: env.FLY_API_TOKEN != ''
+        run: flyctl deploy --remote-only
+        working-directory: server

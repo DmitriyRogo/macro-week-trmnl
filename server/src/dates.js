@@ -35,3 +35,12 @@ export const weekLabel = days => {
   const left = `${MON[a.getUTCMonth()]} ${a.getUTCDate()}`;
   return a.getUTCMonth() === b.getUTCMonth() ? `${left} - ${b.getUTCDate()}` : `${left} - ${MON[b.getUTCMonth()]} ${b.getUTCDate()}`;
 };
+
+// The nth weekday of a month that isn't in `closed`: ISM publishes on business days 1 and 3.
+export const nthBusinessDay = (yearMonth, n, closed = new Set()) => {
+  let d = `${yearMonth}-01`;
+  for (let seen = 0; ; d = addDays(d, 1)) {
+    const w = toDate(d).getUTCDay();
+    if (w !== 0 && w !== 6 && !closed.has(d) && ++seen === n) return d;
+  }
+};

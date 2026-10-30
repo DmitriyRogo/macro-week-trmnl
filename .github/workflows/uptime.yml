@@ -1,0 +1,29 @@
+name: Uptime
+
+# Every 30 minutes: the server answers, its data is fresh, and the hand-kept tables in
+# server/src/config.js aren't about to run out. A failed run emails the repo owner.
+# Note: GitHub pauses scheduled workflows after 60 days without repo activity.
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  healthz:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check https://macro-week.fly.dev/healthz
+        run: |
+          body=$(curl -fsS --retry 2 --retry-delay 20 --max-time 20 https://macro-week.fly.dev/healthz)
+          echo "$body"
+          node -e '
+            const h = JSON.parse(process.argv[1]);
+            const problems = [];
+            if (!h.ok) problems.push("not ok");
+            for (const k of ["fred_age_min", "earnings_age_min"]) if (h[k] === null || h[k] > 180) problems.push(`${k} = ${h[k]}`);
+            problems.push(...(h.warnings ?? []));
+            if (problems.length) { console.error(problems.join("\n")); process.exit(1); }
+          ' "$body"

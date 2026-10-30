@@ -45,6 +45,15 @@ export async function fetchSeries({ apiKey, seriesId, since, limit = 20, fetchIm
 
 const LATEST = '9999-12-31';
 
+// Treasury notes and bonds announced in the last 3 weeks, with results once auctioned.
+// Covers this week's auctions: each is announced about a week ahead. No key needed.
+export async function fetchAuctions({ fetchImpl = fetch } = {}) {
+  const url = 'https://www.treasurydirect.gov/TA_WS/securities/announced?format=json&days=21';
+  const body = await getJson(fetchImpl, url, {}, 'TreasuryDirect');
+  if (!Array.isArray(body)) throw new Error('TreasuryDirect bad response');
+  return body.filter(r => r.securityType !== 'Bill');
+}
+
 // Whole-market earnings calendar between from and to; filtered to the curated list later.
 // Finnhub returns at most 1500 rows per call and drops the rest (a busy week can pass
 // that), so ask one day at a time.

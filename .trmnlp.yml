@@ -10,3 +10,9 @@ time_zone: America/New_York
 
 custom_fields:
   release_scope: all_tracked_releases
+  ticker_group: market_leaders
+
+# Font sizes are fixed px on purpose: 12 / 16 / 21 px are the device's pixel-font sizes, so text
+# stays crisp on the 800x480 1-bit screen. Trade-off: it doesn't scale up on larger TRMNL screens.
+ignored_lint_rules:
+  - no_style_restyling_framework

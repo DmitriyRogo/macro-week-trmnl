@@ -25,8 +25,10 @@
               {%- if r.result.prev -%}<span class="mw-s">est {{ r.result.prev }}</span>{%- endif -%}
             {%- elsif r.kind == "fomc" -%}
               <span class="mw-chip mw-chip--fill">{{ r.result.value }}</span><span>{{ r.result.unit }}</span>
+            {%- elsif r.kind == "auction" -%}
+              <span class="mw-l">{{ r.result.value }}</span><span class="mw-s">high yield{% if r.result.cover %} | {{ r.result.cover }} cover{% endif %}</span>
             {%- else -%}
-              <span class="mw-l">{{ r.result.value }}</span><span class="mw-dir mw-dir--{{ r.result.dir }}"></span><span class="mw-s">{{ r.result.unit }} | prev {{ r.result.prev }}</span>
+              <span class="mw-l">{{ r.result.value }}</span><span class="mw-dir mw-dir--{{ r.result.dir }}"></span><span class="mw-s">{{ r.result.unit }} | prev {{ r.result.prev }}{% if r.result.extra %} | {{ r.result.extra.label }} {{ r.result.extra.value }}{% endif %}</span>
             {%- endif -%}
           </div>
         {%- else -%}
@@ -47,10 +49,10 @@
             {%- endfor -%}
             {%- if d.earnings.size > 0 -%}
               <div class="mw-sect mw-kicker">Earnings</div>
-              {%- for ev in d.earnings -%}
+              {%- for ev in d.earnings limit: d.full_earnings -%}
                 {%- render "mw_ev", ev: ev -%}
               {%- endfor -%}
-              {%- if d.earnings_more > 0 -%}<div class="mw-s mw-note">+{{ d.earnings_more }} more</div>{%- endif -%}
+              {%- if d.full_more > 0 -%}<div class="mw-s mw-note">{% if d.full_earnings == 0 %}{{ d.full_more }} reporting{% else %}+{{ d.full_more }} more{% endif %}</div>{%- endif -%}
             {%- endif -%}
             {%- if d.events.size == 0 and d.earnings.size == 0 -%}<div class="mw-s mw-note">Quiet day</div>{%- endif -%}
           </div>

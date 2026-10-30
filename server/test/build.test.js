@@ -58,7 +58,7 @@ test('only allowlisted releases in the week, headline first on ties', () => {
 });
 
 test('macro results with prior and direction', () => {
-  assert.deepEqual(day('2026-10-27').events[0].result, { value: '+0.3%', unit: 'm/m', prev: '+0.2%', dir: 'up' });
+  assert.deepEqual(day('2026-10-27').events[0].result, { value: '+0.3%', unit: 'm/m', prev: '+0.2%', dir: 'up', extra: null });
   assert.deepEqual(day('2026-10-29').events[0].result, { value: '+2.8%', unit: 'q/q ann.', prev: '+3.1%', dir: 'down' });
   assert.deepEqual(day('2026-10-29').events[1].result, { value: '218K', unit: 'initial', prev: '225K', dir: 'down' });
   assert.equal(day('2026-10-30').events[0].result, null); // not released yet
@@ -120,7 +120,7 @@ test('failed sources hide their section but keep FOMC', () => {
 
 test('only series for releases already due are fetched', () => {
   const need = Object.fromEntries(seriesNeeded({ fred, today: '2026-10-29' }).map(s => [s.id, s.since]));
-  assert.deepEqual(need, { CPIAUCSL: '2026-10-26', A191RL1Q225SBEA: '2026-10-28', ICSA: '2026-10-28', DFEDTARU: null, DFEDTARL: null });
+  assert.deepEqual(need, { CPIAUCSL: '2026-10-26', CPILFESL: '2026-10-26', A191RL1Q225SBEA: '2026-10-28', ICSA: '2026-10-28', DFEDTARU: null, DFEDTARL: null });
   assert.deepEqual(seriesNeeded({ fred: null, today: '2026-10-26' }), []);
 });
 
@@ -140,6 +140,6 @@ test('a repeat Housing Starts date within 12 days is dropped', () => {
   const oct = buildWeek({ fred, earnings: [], today: '2026-10-29', now: '1200' });
   assert.ok(oct.days.every(d => !d.events.some(e => e.label === 'Housing Starts')));
   const nov = buildWeek({ fred, earnings: [], today: '2026-11-18', now: '1200' });
-  assert.deepEqual(nov.days[2].events.map(e => e.label), ['Housing Starts']);
+  assert.deepEqual(nov.days[2].events.map(e => e.label), ['Housing Starts', 'FOMC Minutes']); // minutes: Oct 28 + 3 weeks
   assert.ok(!seriesNeeded({ fred, today: '2026-10-29' }).some(s => s.id === 'HOUST'));
 });

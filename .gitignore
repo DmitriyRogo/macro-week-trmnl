@@ -3,3 +3,4 @@
 *.log
 node_modules/
 secrets.env
+_build/

@@ -37,7 +37,7 @@ test('FOMC hold and hike; pending until FRED has the next day', () => {
 });
 
 test('earnings verdicts', () => {
-  assert.deepEqual(earningsResult({ epsActual: 1.85, epsEstimate: 1.75 }), { value: '1.85', unit: 'EPS', prev: '1.75', verdict: 'beat' });
+  assert.deepEqual(earningsResult({ epsActual: 1.85, epsEstimate: 1.75 }), { value: '1.85', unit: 'EPS', prev: '1.75', verdict: 'beat', rev: null });
   assert.equal(earningsResult({ epsActual: 1.7, epsEstimate: 1.75 }).verdict, 'miss');
   assert.equal(earningsResult({ epsActual: 1.751, epsEstimate: 1.75 }).verdict, 'inline');
   assert.equal(earningsResult({ epsActual: 1.7, epsEstimate: null }).verdict, null);

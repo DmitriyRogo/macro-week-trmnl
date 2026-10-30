@@ -76,5 +76,35 @@ export function earningsResult(row) {
     unit: 'EPS',
     prev: est === null ? null : est.toFixed(2),
     verdict: diff === null ? null : diff > 0 ? 'beat' : diff < 0 ? 'miss' : 'inline',
+    rev: revenueResult(row.revenueActual, row.revenueEstimate),
   };
+}
+
+// Revenue vs estimate -> { value: '94.9B', verdict }, or null. Inline = within 0.5%.
+function revenueResult(actual, est) {
+  if (typeof actual !== 'number' || actual <= 0) return null;
+  const value = actual >= 1e9 ? `${(actual / 1e9).toFixed(1)}B` : `${(actual / 1e6).toFixed(0)}M`;
+  if (typeof est !== 'number' || est <= 0) return { value, verdict: null };
+  const gap = actual / est - 1;
+  return { value, verdict: gap > 0.005 ? 'beat' : gap < -0.005 ? 'miss' : 'inline' };
+}
+
+/**
+ * Second number of a release (core CPI, unemployment rate) -> { label: 'core', value: '+0.3%' },
+ * or null under the same freshness rule as the headline.
+ */
+export function extraResult(extra, obs, releaseDate) {
+  const r = macroResult({ ...extra, unit: '' }, obs, releaseDate);
+  return r && { label: extra.label, value: r.value };
+}
+
+/**
+ * Treasury auction result from a TreasuryDirect row, or null before the auction.
+ * -> { value: '4.894%', unit: 'yield', prev: null, cover: '2.46x', dir: null }
+ */
+export function auctionResult(row) {
+  const y = Number.parseFloat(row.highYield);
+  if (!Number.isFinite(y)) return null;
+  const btc = Number.parseFloat(row.bidToCoverRatio);
+  return { value: `${y.toFixed(3)}%`, unit: 'yield', prev: null, cover: Number.isFinite(btc) ? `${btc.toFixed(2)}x` : null, dir: null };
 }
