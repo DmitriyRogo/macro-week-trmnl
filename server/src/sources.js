@@ -8,22 +8,29 @@ const getJson = async (fetchImpl, url, init, name) => {
   return res.json();
 };
 
-// Every scheduled release (all sources) between from and to, inclusive.
+// Every scheduled release (all sources) between from and to, inclusive. FRED returns at most
+// 1000 rows per call (about three weeks' worth), so page through with offset.
 export async function fetchFred({ apiKey, from, to, fetchImpl = fetch }) {
-  const url = new URL('https://api.stlouisfed.org/fred/releases/dates');
-  url.search = new URLSearchParams({
-    api_key: apiKey,
-    file_type: 'json',
-    include_release_dates_with_no_data: 'true', // otherwise future dates are excluded
-    realtime_start: from,
-    realtime_end: to,
-    sort_order: 'asc',
-    limit: '1000',
-  });
-  const body = await getJson(fetchImpl, url, {}, 'FRED');
-  if (!Array.isArray(body.release_dates)) throw new Error(`FRED bad response: ${body.error_message ?? 'no release_dates'}`);
-  if (body.release_dates.length >= 1000) console.warn('FRED release calendar: 1000 rows, may be truncated');
-  return body.release_dates;
+  const rows = [];
+  for (let page = 0; page < 10; page++) {
+    const url = new URL('https://api.stlouisfed.org/fred/releases/dates');
+    url.search = new URLSearchParams({
+      api_key: apiKey,
+      file_type: 'json',
+      include_release_dates_with_no_data: 'true', // otherwise future dates are excluded
+      realtime_start: from,
+      realtime_end: to,
+      sort_order: 'asc',
+      limit: '1000',
+      offset: String(rows.length),
+    });
+    const body = await getJson(fetchImpl, url, {}, 'FRED');
+    if (!Array.isArray(body.release_dates)) throw new Error(`FRED bad response: ${body.error_message ?? 'no release_dates'}`);
+    rows.push(...body.release_dates);
+    if (body.release_dates.length < 1000) return rows;
+  }
+  console.warn('FRED release calendar: stopped after 10 pages');
+  return rows;
 }
 
 // Newest current observations of one FRED series, newest first. Each has date, value

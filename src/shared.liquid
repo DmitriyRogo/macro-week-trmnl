@@ -55,7 +55,7 @@
 
 {%- comment -%}
   Data comes pre-built from the Macro Week server (see server/), merged at the top level:
-    week_label    'Oct 26 - 30'
+    week_label    'Oct 26 - 30'; tz_label 'ET' / 'PT' / ...: zone of every time shown
     days[]        Mon-Fri: date, dow, day, is_today, status (past|today|future),
                   market (open|closed|early_close), events[] (macro + FOMC), earnings[] (top 4), earnings_more
     next          first event still to come, with when ('Today 8:30', 'Tomorrow AMC', 'Thu 2:00')
@@ -145,6 +145,6 @@
 {% template mw_title %}
 <div class="title_bar">
   <span class="title">Macro Week</span>
-  <span class="instance">{{ week_label }}{% if week_label %} | {% endif %}ET{% if macro_ok == false %} | macro data unavailable{% endif %}</span>
+  <span class="instance">{{ week_label }}{% if week_label %} | {% endif %}{{ tz_label | default: "ET" }}{% if macro_ok == false %} | macro data unavailable{% endif %}</span>
 </div>
 {% endtemplate %}

@@ -44,8 +44,10 @@ test('calendar week Mon-Fri with past / today / future', () => {
   assert.equal(day('2026-10-29').is_today, true);
 });
 
-test('Saturday recaps the week that ended, Sunday previews the next', () => {
-  assert.equal(weekDays('2026-10-31')[0], '2026-10-26');
+test('next week shows from Friday 6 PM through the weekend', () => {
+  assert.equal(weekDays('2026-10-30', '1759')[0], '2026-10-26');
+  assert.equal(weekDays('2026-10-30', '1800')[0], '2026-11-02');
+  assert.equal(weekDays('2026-10-31')[0], '2026-11-02');
   assert.equal(weekDays('2026-11-01')[0], '2026-11-02');
   assert.equal(weekLabel(weekDays('2026-11-29')), 'Nov 30 - Dec 4');
 });

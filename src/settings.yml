@@ -14,7 +14,7 @@ framework_version: latest
 id: 524760
 # One URL: the Macro Week server (server/) returns the whole week pre-built.
 # Replace the host with your deployed app's URL.
-polling_url: https://macro-week.fly.dev/week?scope={{ release_scope }}&group={{ ticker_group }}
+polling_url: https://macro-week.fly.dev/week?scope={{ release_scope }}&group={{ ticker_group }}&zone={{ display_zone }}&tickers={{ my_tickers | url_encode }}
 # If the server sets ACCESS_TOKEN, send it here: Authorization=Bearer <token>
 polling_headers: ''
 name: Macro Week
@@ -22,13 +22,13 @@ description: US macro + earnings this week
 # The server re-checks every 5 minutes on release mornings; poll often enough to show it.
 refresh_interval: 15
 recipe_overview: |-
-  Macro Week puts the US events that move markets this week on your TRMNL, and shows how each one turned out. Headline economic releases such as CPI, the jobs report, GDP, PCE, PPI and retail sales appear with their Eastern release times; once published, the screen shows the actual number with an arrow against the prior reading, plus core inflation or the unemployment rate underneath. FOMC decision days show cut, hold or hike and the new rate range, with projection meetings and minutes marked. Treasury note and bond auctions show the winning yield and demand. Earnings for the biggest US companies show the EPS estimate before the report, then actual EPS and revenue with beat or miss. Market holidays and early closes are marked. Pick a company group and how many releases you want. No setup or API keys needed. Data from FRED (St. Louis Fed), Finnhub, TreasuryDirect and the Federal Reserve. Open source: github.com/DmitriyRogo/macro-week-trmnl
+  Macro Week puts the US events that move markets this week on your TRMNL, and shows how each one turned out. Headline economic releases such as CPI, the jobs report, GDP, PCE, PPI and retail sales appear with their release times in your time zone; once published, the screen shows the actual number with an arrow against the prior reading, plus core inflation or the unemployment rate underneath. FOMC decision days show cut, hold or hike and the new rate range, with projection meetings and minutes marked. Treasury note and bond auctions show the winning yield and demand. Earnings for the biggest US companies show the EPS estimate before the report, then actual EPS and revenue with beat or miss. Market holidays and early closes are marked. Pick a company group, add your own tickers, and choose how many releases you want. From Friday evening the screen previews next week. No setup or API keys needed. Data from FRED (St. Louis Fed), Finnhub, TreasuryDirect and the Federal Reserve. Open source: github.com/DmitriyRogo/macro-week-trmnl
 custom_fields:
 - keyname: about
   name: About This Plugin
   field_type: author_bio
   category: finance
-  description: Shows what is coming that might move markets this week, and how it turned out. All times are US Eastern (ET). Data from FRED (St. Louis Fed), Finnhub, TreasuryDirect and the Federal Reserve.
+  description: Shows what is coming that might move markets this week, and how it turned out. Times are shown in the zone you pick below. Data from FRED (St. Louis Fed), Finnhub, TreasuryDirect and the Federal Reserve.
   github_url: https://github.com/DmitriyRogo/macro-week-trmnl
   learn_more_url: https://github.com/DmitriyRogo/macro-week-trmnl#readme
 - keyname: release_scope
@@ -48,4 +48,25 @@ custom_fields:
   - Mega cap tech
   - Big banks
   - Dow 30
+  - Only my tickers
   default: market_leaders
+- keyname: my_tickers
+  field_type: string
+  name: Your tickers
+  description: Up to 10 US symbols, separated by commas, for example NVDA, COST, UBER. They show first, ahead of the group above.
+  placeholder: NVDA, COST, UBER
+  optional: true
+- keyname: display_zone
+  field_type: select
+  name: Time zone
+  description: Release times are converted to this zone. Earnings keep BMO (before open) and AMC (after close).
+  options:
+  - Eastern
+  - Central
+  - Mountain
+  - Arizona
+  - Pacific
+  - Alaska
+  - Hawaii
+  - London
+  default: eastern

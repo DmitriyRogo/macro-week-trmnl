@@ -15,13 +15,13 @@ This week's market-moving US events on your [TRMNL](https://trmnl.com) e-ink dis
 
 ## What it shows
 
-- **Macro releases** with ET release time: CPI, PPI, Jobs Report, GDP, PCE, Retail Sales, plus (optionally) JOLTS, Jobless Claims, UMich Sentiment, Housing Starts and the ISM PMIs. Once released: the actual number with an arrow against the prior reading (`+0.3% ▲ prev +0.2%`), and a second number underneath where it matters: **core CPI**, **core PCE**, the **unemployment rate**.
-- **FOMC**: decision days (2:00 PM ET), marked **SEP** when new projections come out; once decided, **CUT / HOLD / HIKE** and the new target range. **Minutes** three weeks later.
+- **Macro releases** with their release time, in the viewer's time zone: CPI, PPI, Jobs Report, GDP, PCE, Retail Sales, plus (optionally) JOLTS, Jobless Claims, UMich Sentiment, Housing Starts and the ISM PMIs. Once released: the actual number with an arrow against the prior reading (`+0.3% ▲ prev +0.2%`), and a second number underneath where it matters: **core CPI**, **core PCE**, the **unemployment rate**.
+- **FOMC**: decision days (2:00 PM ET, converted like every other time), marked **SEP** when new projections come out; once decided, **CUT / HOLD / HIKE** and the new target range. **Minutes** three weeks later.
 - **Treasury auctions** of 2, 5, 7, 10, 20 and 30-year notes and bonds: the winning yield and bid-to-cover once auctioned.
-- **Earnings** for one of four company groups (market leaders, mega-cap tech, big banks, Dow 30), tagged BMO / AMC, with the EPS estimate. Once reported: actual EPS with **BEAT / MISS / INLINE**, and revenue against its estimate.
+- **Earnings** for one of four company groups (market leaders, mega-cap tech, big banks, Dow 30) plus up to 10 tickers of the user's own, tagged BMO / AMC, with the EPS estimate. Once reported: actual EPS with **BEAT / MISS / INLINE**, and revenue against its estimate.
 - **Market holidays** and 1:00 PM early closes.
 
-The screen shows the current week, Mon-Fri, so earlier days keep their results. Saturday recaps the week that just ended; Sunday previews the next one. All times are US Eastern. Users install it and it works: no API keys, no watchlist.
+The screen shows the current week, Mon-Fri, so earlier days keep their results. From Friday 6 PM (viewer's time) through the weekend it previews next week. Times follow the viewer's chosen zone (US zones or London; DST handled per zone). Users install it and it works: no API keys needed.
 
 ## How it works
 
@@ -34,7 +34,7 @@ TreasuryDirect ┘   hourly + every 5 min on     └─ TRMNL (user B's plugin) 
 
 - **`server/`** (Node, no dependencies) fetches with one shared key per source: FRED's release calendar, Finnhub's whole-market earnings calendar (actual EPS and revenue included), TreasuryDirect's auction list, and, for releases already due this week, the FRED series holding each result. It adds the FOMC, ISM and holiday tables and builds one JSON week. Every user gets the same response (one variant per form setting), so upstream load doesn't grow with installs.
 - On release days the server re-checks every 5 minutes until each result is in, instead of waiting for the hourly refresh. TRMNL polls every 15 minutes.
-- **`src/`** is the TRMNL plugin. It polls `GET /week?scope=…&group=…` and only renders.
+- **`src/`** is the TRMNL plugin. It polls `GET /week?scope=…&group=…&zone=…&tickers=…` and only renders.
 
 ## Lessons from live data
 
@@ -62,7 +62,9 @@ Everything passed unit tests against mock data. Pointing it at the real APIs fou
 | Field | keyname | Options |
 | --- | --- | --- |
 | Releases | `release_scope` | **All tracked releases** (default) or **Headline only** (CPI, PPI, Jobs, GDP, PCE, Retail Sales). FOMC decisions always show. |
-| Companies | `ticker_group` | **Market leaders** (default), **Mega cap tech**, **Big banks**, **Dow 30** |
+| Companies | `ticker_group` | **Market leaders** (default), **Mega cap tech**, **Big banks**, **Dow 30**, **Only my tickers** |
+| Your tickers | `my_tickers` | Up to 10 US symbols, comma-separated (`NVDA, COST, UBER`). Shown first. Free for the server: it already fetches the whole market's calendar and filters it. |
+| Time zone | `display_zone` | **Eastern** (default), Central, Mountain, Arizona, Pacific, Alaska, Hawaii, London (24-hour). Earnings keep BMO / AMC. |
 
 ## Server
 
@@ -90,7 +92,7 @@ npm run verify                 # checks the live APIs still match what the serve
 | `MAX_STALE_HOURS` | `36` | After this long without a successful fetch, that section hides |
 
 Endpoints:
-- `GET /week?scope=all_tracked_releases|headline_only&group=market_leaders|mega_cap_tech|big_banks|dow_30`
+- `GET /week?scope=all_tracked_releases|headline_only&group=market_leaders|mega_cap_tech|big_banks|dow_30|only_my_tickers&zone=eastern|central|…|london&tickers=NVDA,COST`
 - `GET /healthz`: minutes since each source refreshed, plus `warnings` when a hand-kept table in `config.js` runs out within 60 days.
 
 A failed fetch keeps the last good data. On a cold start the first request waits for the initial fetch.

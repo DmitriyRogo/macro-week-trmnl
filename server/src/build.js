@@ -1,14 +1,21 @@
 import {
   RELEASES, FOMC, FED_TARGET, FOMC_MINUTES_LAG_DAYS, FOMC_MINUTES_OVERRIDES, ISM, AUCTION_TERMS, MARKET_CLOSED, EARLY_CLOSE,
-  TICKER_GROUPS, DEFAULT_GROUP, EARNINGS_PER_DAY, SYMBOL_ALIASES, UPCOMING_LIMIT, LATEST_LIMIT, CONFIG_WARN_DAYS,
+  TICKER_GROUPS, DEFAULT_GROUP, MAX_CUSTOM_TICKERS, TIME_ZONES, DEFAULT_ZONE, EARNINGS_PER_DAY, SYMBOL_ALIASES, UPCOMING_LIMIT, LATEST_LIMIT, CONFIG_WARN_DAYS,
 } from './config.js';
-import { dow, weekDays, weekLabel, addDays, nthBusinessDay } from './dates.js';
+import { dow, weekDays, weekLabel, addDays, nthBusinessDay, fromET } from './dates.js';
 import { macroResult, extraResult, fomcResult, earningsResult, auctionResult } from './results.js';
 
 // Earnings report times as sortable HHMM. TBD sorts last in the day.
 const HOURS = { bmo: { label: 'BMO', at: '0700' }, dmh: { label: 'DMH', at: '1200' }, amc: { label: 'AMC', at: '1600' } };
 const TBD = { label: 'TBD', at: '2359' };
 const hhmm = t => t.padStart(5, '0').replace(':', ''); // '8:30' -> '0830'
+
+// '1330' -> '1:30', or '13:30' on a 24-hour clock.
+const clock = (at, h24) => `${h24 ? Number(at.slice(0, 2)) : Number(at.slice(0, 2)) % 12 || 12}:${at.slice(2)}`;
+
+// "Your tickers" form text ('nvda, brk-b  UBER') -> ['NVDA', 'BRK.B', 'UBER'].
+export const parseTickers = raw => [...new Set(String(raw ?? '').toUpperCase().replace(/-/g, '.').split(/[\s,;]+/)
+  .filter(t => /^[A-Z][A-Z0-9.]{0,7}$/.test(t)))].slice(0, MAX_CUSTOM_TICKERS);
 
 // Releases whose result series the server should fetch for this week (dates up to today).
 // FRED rows for tracked releases that actually publish: drops a date that comes within
@@ -42,15 +49,18 @@ export function seriesNeeded({ fred, today }) {
  *   earnings  Finnhub earningsCalendar rows, or null if unavailable
  *   series    { [seriesId]: observations newest-first } for results
  *   auctions  TreasuryDirect announced securities, or null if unavailable
- *   today     'YYYY-MM-DD' (ET), now: 'HHMM' (ET)
+ *   today     'YYYY-MM-DD', now: 'HHMM', both in the viewer's zone
  *   scope     'all_tracked_releases' | 'headline_only'; group: key of TICKER_GROUPS
+ *   tickers   symbols from the "Your tickers" field, shown ahead of the group
+ *   zone      key of TIME_ZONES: times on screen are converted to it
  */
-export function buildWeek({ fred, earnings, series = {}, auctions = null, today, now = '0000', scope = 'all_tracked_releases', group = DEFAULT_GROUP, generatedAt = new Date().toISOString() }) {
-  const dates = weekDays(today);
+export function buildWeek({ fred, earnings, series = {}, auctions = null, today, now = '0000', scope = 'all_tracked_releases', group = DEFAULT_GROUP, tickers = [], zone = DEFAULT_ZONE, generatedAt = new Date().toISOString() }) {
+  const dates = weekDays(today, now);
+  const { tz, label: tzLabel, h24 } = TIME_ZONES[zone] ?? TIME_ZONES[DEFAULT_ZONE];
   const inWeek = new Set(dates);
   const allTracked = scope !== 'headline_only';
-  const tickers = TICKER_GROUPS[group] ?? TICKER_GROUPS[DEFAULT_GROUP];
-  const rank = new Map(tickers.map((t, i) => [t, i]));
+  const mine = tickers.slice(0, MAX_CUSTOM_TICKERS);
+  const rank = new Map([...new Set([...mine, ...(TICKER_GROUPS[group] ?? TICKER_GROUPS[DEFAULT_GROUP])])].map((t, i) => [t, i]));
   const byDate = new Map(dates.map(d => [d, { macro: [], earn: [] }]));
   // no_result: events that never get a result on screen (FOMC minutes, ISM).
   const base = { sep: false, eps: null, result: null, verdict: null, no_result: false };
@@ -106,6 +116,15 @@ export function buildWeek({ fred, earnings, series = {}, auctions = null, today,
       result, verdict: result?.verdict ?? null });
   }
 
+  // Schedules are kept in ET; move each event to the viewer's clock. Earnings keep BMO / AMC.
+  for (const [date, { macro, earn }] of byDate) {
+    for (const e of [...macro, ...earn]) {
+      if (e._at === TBD.at) continue; // TBD stays last in the day
+      e._at = fromET(date, e._at, tz);
+      if (e.kind !== 'earn' && tz !== TIME_ZONES[DEFAULT_ZONE].tz) e.time = clock(e._at, h24);
+    }
+  }
+
   const order = (a, b) => a._at.localeCompare(b._at) || a._tie - b._tie;
   const status = (date, at) => (date < today || (date === today && at <= now) ? 'past' : 'future');
   const days = dates.map(date => {
@@ -139,6 +158,9 @@ export function buildWeek({ fred, earnings, series = {}, auctions = null, today,
     week_label: weekLabel(dates),
     scope: allTracked ? 'all_tracked_releases' : 'headline_only',
     group: TICKER_GROUPS[group] ? group : DEFAULT_GROUP,
+    tickers: mine,
+    zone: TIME_ZONES[zone] ? zone : DEFAULT_ZONE,
+    tz_label: tzLabel,
     auctions_ok: Array.isArray(auctions),
     macro_ok: Array.isArray(fred),
     earnings_ok: Array.isArray(earnings),

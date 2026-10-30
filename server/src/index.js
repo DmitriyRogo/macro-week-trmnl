@@ -1,9 +1,9 @@
 import http from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
-import { buildWeek, seriesNeeded, configWarnings } from './build.js';
+import { buildWeek, seriesNeeded, configWarnings, parseTickers } from './build.js';
 import { fetchFred, fetchEarnings, fetchSeries, fetchAuctions } from './sources.js';
-import { TICKER_GROUPS } from './config.js';
-import { todayET, timeET, weekDays, addDays } from './dates.js';
+import { TICKER_GROUPS, TIME_ZONES, DEFAULT_ZONE, SYMBOL_ALIASES } from './config.js';
+import { todayET, timeET, todayIn, timeIn, weekDays, addDays } from './dates.js';
 
 const {
   FRED_API_KEY, FINNHUB_API_KEY, ACCESS_TOKEN,
@@ -22,10 +22,11 @@ if (!FRED_API_KEY || !FINNHUB_API_KEY) {
 // series: FRED observations per series id, for this week's results.
 const cache = { fred: { data: null, at: 0 }, earnings: { data: null, at: 0 }, auctions: { data: null, at: 0 }, series: {} };
 
-// FRED's window starts two weeks early so build.js can spot repeat release dates (minGapDays).
+// Covers this week and next: from Friday 6 PM viewers see next week, earlier in zones east of
+// ET. FRED's window starts two weeks early so build.js can spot repeat release dates (minGapDays).
 async function refreshSource(name, fetcher, apiKey, lookbackDays = 0) {
-  const days = weekDays(todayET());
-  const window = { apiKey, from: addDays(days[0], -lookbackDays), to: days[4] };
+  const monday = weekDays(todayET())[0];
+  const window = { apiKey, from: addDays(monday, -lookbackDays), to: addDays(monday, 11) };
   try {
     cache[name] = { data: await fetcher(window), at: Date.now() };
     console.log(`${new Date().toISOString()} ${name}: ${cache[name].data.length} rows`);
@@ -62,16 +63,26 @@ const toMin = hhmm => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(2));
 const eventAt = e => AT[e.time] ?? e.time.padStart(5, '0').replace(':', '');
 const SOURCE = { macro: 'series', auction: 'auctions', earn: 'earnings' }; // FOMC's result posts the next day
 
+// Symbols from "Your tickers" fields seen in the last two days, so their results also get the
+// fast path. Bounded: oldest dropped first.
+const recentTickers = new Map(); // symbol -> last seen (ms)
+const noteTickers = list => {
+  for (const t of list) recentTickers.delete(t), recentTickers.set(t, Date.now());
+  for (const [t, at] of recentTickers) if (recentTickers.size > 500 || Date.now() - at > 2 * 86_400_000) recentTickers.delete(t); else break;
+};
+
 function pendingSources(now = new Date()) {
   const today = todayET(now);
   const mins = toMin(timeET(now));
   const owed = new Set();
+  const due = at => mins - toMin(at) >= 0 && mins - toMin(at) <= 240;
+  if ((cache.earnings.data ?? []).some(r => r.date === today && r.epsActual == null && AT[String(r.hour).toUpperCase()]
+    && recentTickers.has(SYMBOL_ALIASES[r.symbol] ?? r.symbol) && due(AT[String(r.hour).toUpperCase()]))) owed.add('earnings');
   for (const group of Object.keys(TICKER_GROUPS)) {
     const week = buildWeek({ fred: cache.fred.data, earnings: cache.earnings.data, series: cache.series, auctions: cache.auctions.data, today, now: timeET(now), group });
     const day = week.days.find(d => d.date === today);
     for (const e of day ? [...day.events, ...day.earnings] : []) {
-      const late = mins - toMin(eventAt(e));
-      if (SOURCE[e.kind] && !e.result && !e.no_result && late >= 0 && late <= 240) owed.add(SOURCE[e.kind]);
+      if (SOURCE[e.kind] && !e.result && !e.no_result && due(eventAt(e))) owed.add(SOURCE[e.kind]);
     }
   }
   return owed;
@@ -122,15 +133,20 @@ http.createServer(async (req, res) => {
     if (!authorized(req)) return send(res, 401, { error: 'unauthorized' });
     if (!cache.fred.at && !cache.earnings.at) await firstRefresh; // cold start: wait for the first fetch
     const now = new Date();
+    const zone = TIME_ZONES[param(url, 'zone')] ? param(url, 'zone') : DEFAULT_ZONE;
+    const tickers = parseTickers(url.searchParams.get('tickers'));
+    noteTickers(tickers);
     const week = buildWeek({
       fred: fresh(cache.fred),
       earnings: fresh(cache.earnings),
       series: cache.series,
       auctions: fresh(cache.auctions),
-      today: todayET(now),
-      now: timeET(now),
+      today: todayIn(TIME_ZONES[zone].tz, now),
+      now: timeIn(TIME_ZONES[zone].tz, now),
       scope: param(url, 'scope'),
       group: param(url, 'group'),
+      tickers,
+      zone,
     });
     return send(res, 200, week, { 'Cache-Control': 'public, max-age=300' });
   }

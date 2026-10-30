@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildWeek, seriesNeeded, configWarnings } from '../src/build.js';
+import { buildWeek, seriesNeeded, configWarnings, parseTickers } from '../src/build.js';
 import { earningsResult, auctionResult } from '../src/results.js';
 import { nthBusinessDay, todayET } from '../src/dates.js';
 import { MARKET_CLOSED } from '../src/config.js';
@@ -105,4 +105,42 @@ test('full layout shows only the earnings that fit under a busy day', () => {
   assert.ok(busy.full_earnings < 4);
   assert.equal(busy.full_earnings + busy.full_more, 5);
   assert.equal(busy.earnings.length, 4); // the list layouts still get the top 4
+});
+
+test('"Your tickers" come first, any US symbol, and only-mine drops the group', () => {
+  assert.deepEqual(parseTickers(' nvda, brk-b;UBER  uber $$ 123 '), ['NVDA', 'BRK.B', 'UBER']);
+  assert.equal(parseTickers(Array.from({ length: 15 }, (_, i) => `T${i}`).join(',')).length, 10);
+  const earnings = ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'UBER', 'SHOP'].map(symbol => ({ symbol, date: '2026-10-29', hour: 'amc', epsEstimate: 1 }));
+  const mixed = buildWeek({ fred: [], earnings, today: '2026-10-28', now: '1200', tickers: ['SHOP', 'UBER'] });
+  assert.deepEqual(labels(mixed.days[3].earnings).sort(), ['AAPL', 'MSFT', 'SHOP', 'UBER']);
+  assert.equal(mixed.days[3].earnings_more, 2);
+  assert.deepEqual(mixed.tickers, ['SHOP', 'UBER']);
+  const mine = buildWeek({ fred: [], earnings, today: '2026-10-28', now: '1200', group: 'only_my_tickers', tickers: ['UBER'] });
+  assert.deepEqual(labels(mine.days[3].earnings), ['UBER']);
+  assert.equal(mine.days[3].earnings_more, 0);
+});
+
+test('times convert to the chosen zone, DST-aware; earnings keep BMO / AMC', () => {
+  const fred = [{ release_id: 53, date: '2026-10-29' }];
+  const earnings = [{ symbol: 'AAPL', date: '2026-10-29', hour: 'amc', epsEstimate: 1 }, { symbol: 'MSFT', date: '2026-10-29', hour: '', epsEstimate: 1 }];
+  const at = (zone, today = '2026-10-28') => buildWeek({ fred, earnings, today, now: '1200', zone }).days[3];
+  assert.equal(at('pacific').events[0].time, '5:30');
+  assert.equal(at('london').events[0].time, '12:30'); // UK already on winter time, US not yet
+  assert.equal(at('hawaii').events[0].time, '2:30');
+  assert.equal(at('eastern').events[0].time, '8:30');
+  assert.deepEqual(at('london').earnings.map(e => e.time), ['AMC', 'TBD']);
+  assert.equal(buildWeek({ fred, earnings, today: '2026-10-28', zone: 'pacific' }).tz_label, 'PT');
+  assert.equal(buildWeek({ fred, earnings, today: '2026-10-28', zone: 'nowhere' }).zone, 'eastern');
+  // Status uses the viewer's clock: 8:30 ET has passed at 6:00 PT, not at 5:00 PT.
+  assert.equal(buildWeek({ fred, earnings: [], today: '2026-10-29', now: '0500', zone: 'pacific' }).days[3].events[0].status, 'future');
+  assert.equal(buildWeek({ fred, earnings: [], today: '2026-10-29', now: '0600', zone: 'pacific' }).days[3].events[0].status, 'past');
+});
+
+test('Friday evening shows next week', () => {
+  const fred = [{ release_id: 50, date: '2026-11-06' }];
+  assert.equal(buildWeek({ fred, earnings: [], today: '2026-10-30', now: '1700' }).week_label, 'Oct 26 - 30');
+  const next = buildWeek({ fred, earnings: [], today: '2026-10-30', now: '1800' });
+  assert.equal(next.week_label, 'Nov 2 - 6');
+  assert.equal(next.next.label, 'Jobs Report');
+  assert.ok(next.days.every(d => d.status === 'future'));
 });

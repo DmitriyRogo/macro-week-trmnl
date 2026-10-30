@@ -2,16 +2,40 @@ import { TIME_ZONE } from './config.js';
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const ymd = new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit' });
-const hm = new Intl.DateTimeFormat('en-GB', { timeZone: TIME_ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 
 // Calendar dates are handled as 'YYYY-MM-DD' strings, anchored at noon UTC for arithmetic.
 const toDate = d => new Date(`${d}T12:00:00Z`);
 
-export const todayET = (now = new Date()) => ymd.format(now);
+// Wall-clock parts of an instant in a time zone. One formatter per zone.
+const formatters = new Map();
+const wall = (tz, instant) => {
+  if (!formatters.has(tz)) {
+    formatters.set(tz, new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+    }));
+  }
+  const p = Object.fromEntries(formatters.get(tz).formatToParts(instant).map(x => [x.type, x.value]));
+  return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}${p.minute}` };
+};
 
-// Current ET wall-clock time as a sortable 'HHMM' string.
-export const timeET = (now = new Date()) => hm.format(now).replace(':', '');
+// Today's date and the 'HHMM' wall-clock time in a zone (default ET).
+export const todayIn = (tz = TIME_ZONE, now = new Date()) => wall(tz, now).date;
+export const timeIn = (tz = TIME_ZONE, now = new Date()) => wall(tz, now).time;
+export const todayET = (now = new Date()) => todayIn(TIME_ZONE, now);
+export const timeET = (now = new Date()) => timeIn(TIME_ZONE, now);
+
+// An ET wall-clock time on a date ('2026-10-29', '0830') as 'HHMM' in another zone. DST-aware:
+// ET and London change clocks on different weekends.
+export const fromET = (date, hhmm, tz) => {
+  if (tz === TIME_ZONE) return hhmm;
+  const guess = Date.UTC(...date.split('-').map((n, i) => Number(n) - (i === 1 ? 1 : 0)), Number(hhmm.slice(0, 2)), Number(hhmm.slice(2)));
+  const offset = t => {
+    const w = wall(TIME_ZONE, new Date(t));
+    return Date.UTC(...w.date.split('-').map((n, i) => Number(n) - (i === 1 ? 1 : 0)), Number(w.time.slice(0, 2)), Number(w.time.slice(2))) - t;
+  };
+  const instant = guess - offset(guess - offset(guess));
+  return wall(tz, new Date(instant)).time;
+};
 
 export const addDays = (d, n) => {
   const t = toDate(d);
@@ -21,11 +45,16 @@ export const addDays = (d, n) => {
 
 export const dow = d => DOW[toDate(d).getUTCDay()];
 
-// Mon-Fri of the week to show: the current week, except Sunday previews next week.
-// (Saturday keeps the week that just ended, as a recap.)
-export const weekDays = today => {
+// After this local time on Friday the screen moves on to next week (the market has closed and
+// Friday's few after-close reports are rare).
+export const WEEK_ROLLOVER = '1800';
+
+// Mon-Fri of the week to show: the current week until Friday WEEK_ROLLOVER, then next week
+// through the weekend, so people can see what's coming.
+export const weekDays = (today, now = '0000') => {
   const w = toDate(today).getUTCDay();
-  const monday = addDays(today, w === 0 ? 1 : 1 - w);
+  const ahead = w === 6 || w === 0 || (w === 5 && now >= WEEK_ROLLOVER);
+  const monday = addDays(today, ahead ? (8 - w) % 7 : 1 - w);
   return [0, 1, 2, 3, 4].map(i => addDays(monday, i));
 };
 

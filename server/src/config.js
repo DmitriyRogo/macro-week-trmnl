@@ -86,9 +86,15 @@ export const TICKER_GROUPS = {
   market_leaders: TICKERS,
   mega_cap_tech: ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'ORCL', 'NFLX', 'AMD', 'CRM', 'ADBE', 'CSCO', 'QCOM', 'IBM', 'INTC', 'MU'],
   big_banks: ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'SCHW', 'BLK', 'AXP', 'USB', 'PNC', 'COF', 'BK'],
+  only_my_tickers: [],
   dow_30: ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'JPM', 'V', 'WMT', 'UNH', 'HD', 'PG', 'JNJ', 'GS', 'CAT', 'MCD', 'CVX', 'CRM', 'IBM', 'KO', 'MRK', 'CSCO', 'AXP', 'BA', 'AMGN', 'HON', 'DIS', 'MMM', 'NKE', 'SHW', 'TRV', 'VZ'],
 };
 export const DEFAULT_GROUP = 'market_leaders';
+
+// "Your tickers" form field: listed first, ahead of the chosen group. With only_my_tickers
+// as the group, nothing else. Any US symbol works: the server already fetches the whole
+// market's calendar, so these are filtered from it at no extra API cost.
+export const MAX_CUSTOM_TICKERS = 10;
 
 // Calendar symbol -> the ticker shown. Finnhub's whole-market calendar lists
 // Berkshire only as BRK.A.
@@ -98,7 +104,21 @@ export const SYMBOL_ALIASES = { 'BRK.A': 'BRK.B' };
 export const UPCOMING_LIMIT = 12;
 export const LATEST_LIMIT = 6;
 
+// Source schedules are in ET; this is the server's own clock.
 export const TIME_ZONE = 'America/New_York';
+
+// "Time zone" form field: times on screen are converted to this zone. h24: 24-hour clock.
+export const TIME_ZONES = {
+  eastern: { tz: 'America/New_York', label: 'ET' },
+  central: { tz: 'America/Chicago', label: 'CT' },
+  mountain: { tz: 'America/Denver', label: 'MT' },
+  arizona: { tz: 'America/Phoenix', label: 'MST' },
+  pacific: { tz: 'America/Los_Angeles', label: 'PT' },
+  alaska: { tz: 'America/Anchorage', label: 'AKT' },
+  hawaii: { tz: 'Pacific/Honolulu', label: 'HST' },
+  london: { tz: 'Europe/London', label: 'UK', h24: true },
+};
+export const DEFAULT_ZONE = 'eastern';
 
 // Hand-kept tables run out. /healthz lists these warnings (and the uptime check fails on
 // them) this many days before the last entry, so they get updated before the screen goes quiet.
