@@ -1,0 +1,63 @@
+<div class="layout">
+  <div class="mw">
+    <div class="mw-hero">
+      <div class="mw-hero__next mw-inv">
+        <span class="mw-kicker">Next up</span>
+        {%- if next -%}
+          <div class="mw-hero__line">
+            <span class="mw-l mw-b">{{ next.label }}</span>
+            {%- if next.sep -%}<span class="mw-chip">SEP</span>{%- endif -%}
+            <span>{{ next.when }}</span>
+          </div>
+        {%- else -%}
+          <span class="mw-l mw-b">Week complete</span>
+        {%- endif -%}
+      </div>
+      <div class="mw-hero__latest">
+        <span class="mw-kicker">Latest</span>
+        {%- assign r = latest.first -%}
+        {%- if r -%}
+          <div class="mw-hero__line">
+            <span class="mw-l mw-b">{{ r.label }}</span>
+            {%- if r.kind == "earn" -%}
+              <span class="mw-l">{{ r.result.value }}</span>
+              {%- if r.verdict == "beat" %}<span class="mw-chip mw-chip--fill">BEAT</span>{% elsif r.verdict == "miss" %}<span class="mw-chip">MISS</span>{% elsif r.verdict == "inline" %}<span class="mw-chip mw-chip--dash">INLINE</span>{% endif -%}
+              {%- if r.result.prev -%}<span class="mw-s">est {{ r.result.prev }}</span>{%- endif -%}
+            {%- elsif r.kind == "fomc" -%}
+              <span class="mw-chip mw-chip--fill">{{ r.result.value }}</span><span>{{ r.result.unit }}</span>
+            {%- else -%}
+              <span class="mw-l">{{ r.result.value }}</span><span class="mw-dir mw-dir--{{ r.result.dir }}"></span><span class="mw-s">{{ r.result.unit }} | prev {{ r.result.prev }}</span>
+            {%- endif -%}
+          </div>
+        {%- else -%}
+          <span>No results yet this week</span>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="mw-week">
+      {%- for d in days -%}
+        <div class="mw-day mw-day--{{ d.status }}">
+          <div class="mw-day__head"><span class="mw-kicker">{{ d.dow }}</span><span class="mw-l mw-b">{{ d.day }}</span></div>
+          <div class="mw-day__body">
+            {%- if d.market == "closed" -%}<span class="mw-chip mw-chip--dash">MARKET CLOSED</span>
+            {%- elsif d.market == "early_close" -%}<span class="mw-chip mw-chip--dash">CLOSES 1:00</span>{%- endif -%}
+            {%- for ev in d.events -%}
+              {%- render "mw_ev", ev: ev -%}
+            {%- endfor -%}
+            {%- if d.earnings.size > 0 -%}
+              <div class="mw-sect mw-kicker">Earnings</div>
+              {%- for ev in d.earnings -%}
+                {%- render "mw_ev", ev: ev -%}
+              {%- endfor -%}
+              {%- if d.earnings_more > 0 -%}<div class="mw-s mw-note">+{{ d.earnings_more }} more</div>{%- endif -%}
+            {%- endif -%}
+            {%- if d.events.size == 0 and d.earnings.size == 0 -%}<div class="mw-s mw-note">Quiet day</div>{%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+      {%- if days == nil -%}<div class="mw-note">Data unavailable</div>{%- endif -%}
+    </div>
+  </div>
+</div>
+{% render "mw_title", week_label: week_label, macro_ok: macro_ok %}

@@ -1,0 +1,12 @@
+# Local dev server config for `trmnlp serve`. Not uploaded to TRMNL.
+# The plugin polls the URL in src/settings.yml. To preview against a local server,
+# run it with `npm start` in server/ and expose it (e.g. a tunnel), or point
+# polling_url at your deployed app.
+---
+watch:
+  - src
+
+time_zone: America/New_York
+
+custom_fields:
+  release_scope: all_tracked_releases

@@ -1,0 +1,36 @@
+#
+# Changes to this file will be overwritten by `trmnlp pull`.
+#
+# Docs: https://help.trmnl.com/en/articles/10542599-importing-and-exporting-private-plugins#h_581fb988f0
+#
+---
+strategy: polling
+no_screen_padding: 'no'
+dark_mode: 'no'
+static_data: ''
+polling_verb: get
+framework_version: latest
+# One URL: the Macro Week server (server/) returns the whole week pre-built.
+# Replace the host with your deployed app's URL.
+polling_url: https://macro-week.fly.dev/week?scope={{ release_scope }}
+# If the server sets ACCESS_TOKEN, send it here: Authorization=Bearer <token>
+polling_headers: ''
+name: Macro Week
+description: US macro + earnings this week
+refresh_interval: 60
+recipe_overview: |-
+  This week's market-moving US events and how they turned out: headline economic releases (CPI, jobs, GDP, PCE, retail sales and more) with ET times and the actual number vs the prior reading, FOMC decisions (cut / hold / hike, SEP meetings marked), market holidays, and earnings for the biggest US companies (BMO/AMC, estimate, then beat or miss). No setup or API keys needed.
+custom_fields:
+- keyname: about
+  name: About This Plugin
+  field_type: author_bio
+  category: finance
+  description: Shows what is coming that might move markets this week. All times are US Eastern (ET). Data from FRED (St. Louis Fed), Finnhub and the Federal Reserve.
+- keyname: release_scope
+  field_type: select
+  name: Releases
+  description: '"Headline only" shows CPI, PPI, jobs, GDP, PCE and retail sales. "All tracked" adds JOLTS, jobless claims, consumer sentiment and housing starts. FOMC days always show.'
+  options:
+  - All tracked releases
+  - Headline only
+  default: all_tracked_releases

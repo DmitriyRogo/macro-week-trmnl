@@ -1,0 +1,139 @@
+<style>
+  /* Pure black and white for the 1-bit screen. Sizes stay on the framework's pixel-font grid (12 / 16 / 21). */
+  .mw { --ink: #000; --paper: #fff; width: 100%; height: 100%; align-self: stretch; display: flex; flex-direction: column; gap: 8px;
+        font-family: var(--font-base-font-family, "Inter Variable", Inter, sans-serif); font-size: 16px; line-height: 1.15; color: var(--ink); }
+  .mw-s { font-family: var(--font-small-font-family, "Inter Variable", Inter, sans-serif); font-size: 12px; }
+  .mw-l { font-family: var(--font-large-font-family, "Inter Variable", Inter, sans-serif); font-size: 21px; }
+  .mw-b { font-weight: 700; }
+  .mw-kicker { font-family: var(--font-small-font-family, "Inter Variable", Inter, sans-serif); font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .mw-inv { --ink: #fff; --paper: #000; background: var(--paper); color: var(--ink); }
+
+  /* Chips and direction arrows (CSS shapes: pixel fonts may lack arrow glyphs) */
+  .mw-chip { display: inline-block; padding: 0 4px; border: 2px solid var(--ink); border-radius: 3px; font-size: 12px; font-weight: 700; line-height: 13px; letter-spacing: 0.04em; white-space: nowrap; }
+  .mw-chip--fill { background: var(--ink); color: var(--paper); }
+  .mw-chip--dash { border-style: dashed; }
+  .mw-dir { display: inline-block; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; }
+  .mw-dir--up { border-bottom: 8px solid var(--ink); }
+  .mw-dir--down { border-top: 8px solid var(--ink); }
+  .mw-dir--flat { width: 9px; height: 3px; border: 0; background: var(--ink); }
+  .mw-res { display: flex; align-items: center; flex-wrap: wrap; gap: 3px 5px; }
+
+  /* Hero strip: next event (inverted) + latest result */
+  .mw-hero { display: flex; flex: 0 0 auto; border: 2px solid #000; border-radius: 8px; overflow: hidden; }
+  .mw-hero > div { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 6px 12px; min-width: 0; }
+  .mw-hero__next { flex: 0 0 44%; }
+  .mw-hero__latest { flex: 1 1 auto; border-left: 2px solid #000; }
+  .mw-hero__line { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+
+  /* Week grid */
+  .mw-week { display: flex; gap: 6px; flex: 1 1 auto; min-height: 0; }
+  .mw-day { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; border: 2px solid #000; border-radius: 8px; overflow: hidden; }
+  .mw-day__head { display: flex; align-items: baseline; justify-content: space-between; padding: 3px 8px; border-bottom: 2px solid #000; }
+  .mw-day--today .mw-day__head { background: #000; color: #fff; }
+  .mw-day--past .mw-day__head { border-bottom-style: dashed; }
+  .mw-day__body { display: flex; flex-direction: column; gap: 6px; padding: 6px 7px; overflow: hidden; }
+  .mw-sect { display: flex; align-items: center; gap: 5px; margin-top: 1px; }
+  .mw-sect::after { content: ""; flex: 1; border-top: 2px dotted #000; }
+  .mw-ev__top { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; }
+  .mw-ev--fomc .mw-ev__top { background: #000; color: #fff; padding: 1px 5px; border-radius: 3px; }
+  .mw-ev--major .mw-ev__name, .mw-ev--earn .mw-ev__name, .mw-ev--fomc .mw-ev__name { font-weight: 700; }
+  .mw-ev .mw-res { margin-top: 2px; }
+  .mw-note { font-style: italic; }
+
+  /* Lists (half + quadrant layouts) */
+  .mw-panels { display: flex; gap: 16px; flex: 1 1 auto; min-height: 0; }
+  .mw-panel { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+  .mw-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; border-bottom: 1px dotted #000; white-space: nowrap; }
+  .mw-row:last-child { border-bottom: 0; }
+  .mw-row__day { flex: 0 0 44px; }
+  .mw-row__day--today { background: #000; color: #fff; text-align: center; border-radius: 3px; }
+  .mw-row__name { overflow: hidden; text-overflow: ellipsis; }
+  .mw-row--major .mw-row__name, .mw-row--earn .mw-row__name, .mw-row--fomc .mw-row__name { font-weight: 700; }
+  .mw-row__end { margin-left: auto; }
+  .mw-next { border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto; }
+</style>
+
+{%- comment -%}
+  Data comes pre-built from the Macro Week server (see server/), merged at the top level:
+    week_label    'Oct 26 - 30'
+    days[]        Mon-Fri: date, dow, day, is_today, status (past|today|future),
+                  market (open|closed|early_close), events[] (macro + FOMC), earnings[] (top 4), earnings_more
+    next          first event still to come, with when ('Today 8:30', 'Tomorrow AMC', 'Thu 2:00')
+    latest[]      released events with results, most recent first
+    upcoming[]    events still to come, nearest first
+    macro_ok / earnings_ok   false when that upstream source is unavailable
+  Event: kind (macro|fomc|earn), label, time, major, sep, eps (estimate), status (past|future),
+         result { value, unit, prev, dir (up|down|flat) } or null, verdict (beat|miss|inline) for earnings.
+  Write the template / endtemplate tags without "-" whitespace trimming: TRMNL's parser misses a
+  trimmed endtemplate and swallows the rest of the layout, leaving a blank screen.
+{%- endcomment -%}
+
+{%- comment -%} One event inside a day column (full layout). {%- endcomment -%}
+{% template mw_ev %}
+<div class="mw-ev mw-ev--{{ ev.kind }}{% if ev.major %} mw-ev--major{% endif %}">
+  <div class="mw-ev__top">
+    <span class="mw-ev__name">{{ ev.label }}{% if ev.sep %} <span class="mw-s">+SEP</span>{% endif %}</span>
+    <span class="mw-s">{{ ev.time }}</span>
+  </div>
+  {%- if ev.result -%}
+    <div class="mw-res">
+      {%- if ev.kind == "earn" -%}
+        <span class="mw-b">{{ ev.result.value }}</span>
+        {%- if ev.verdict == "beat" %}<span class="mw-chip mw-chip--fill">BEAT</span>{% elsif ev.verdict == "miss" %}<span class="mw-chip">MISS</span>{% elsif ev.verdict == "inline" %}<span class="mw-chip mw-chip--dash">INLINE</span>{% endif -%}
+      {%- elsif ev.kind == "fomc" -%}
+        <span class="mw-chip{% if ev.result.dir != 'flat' %} mw-chip--fill{% endif %}">{{ ev.result.value }}</span><span class="mw-s">{{ ev.result.unit }}</span>
+      {%- else -%}
+        <span class="mw-b">{{ ev.result.value }}</span><span class="mw-dir mw-dir--{{ ev.result.dir }}"></span><span class="mw-s">prev {{ ev.result.prev }}</span>
+      {%- endif -%}
+    </div>
+  {%- elsif ev.status == "past" -%}
+    <div class="mw-s mw-note">awaiting data</div>
+  {%- elsif ev.kind == "earn" and ev.eps -%}
+    <div class="mw-s">est {{ ev.eps }}</div>
+  {%- endif -%}
+</div>
+{% endtemplate %}
+
+{%- comment -%} One event as a list row (half + quadrant layouts). {%- endcomment -%}
+{% template mw_row %}
+<div class="mw-row mw-row--{{ ev.kind }}{% if ev.major %} mw-row--major{% endif %}">
+  {%- if ev.is_today -%}<span class="mw-row__day mw-row__day--today mw-kicker">Today</span>
+  {%- else -%}<span class="mw-row__day mw-kicker">{{ ev.dow }}</span>{%- endif -%}
+  <span class="mw-row__name">{{ ev.label }}</span>
+  <span class="mw-s">{{ ev.time }}</span>
+  <span class="mw-row__end mw-res">
+    {%- if ev.result -%}
+      {%- if ev.kind == "earn" -%}
+        <span class="mw-b">{{ ev.result.value }}</span>
+        {%- if ev.verdict == "beat" %}<span class="mw-chip mw-chip--fill">BEAT</span>{% elsif ev.verdict == "miss" %}<span class="mw-chip">MISS</span>{% elsif ev.verdict == "inline" %}<span class="mw-chip mw-chip--dash">INLINE</span>{% endif -%}
+      {%- elsif ev.kind == "fomc" -%}
+        <span class="mw-chip{% if ev.result.dir != 'flat' %} mw-chip--fill{% endif %}">{{ ev.result.value }}</span>
+      {%- else -%}
+        <span class="mw-b">{{ ev.result.value }}</span><span class="mw-dir mw-dir--{{ ev.result.dir }}"></span>
+      {%- endif -%}
+    {%- elsif ev.kind == "earn" and ev.eps -%}<span class="mw-s">est {{ ev.eps }}</span>
+    {%- elsif ev.sep -%}<span class="mw-chip">SEP</span>
+    {%- endif -%}
+  </span>
+</div>
+{% endtemplate %}
+
+{%- comment -%} Big "next up" block. {%- endcomment -%}
+{% template mw_next %}
+<div class="mw-next mw-inv">
+  <span class="mw-kicker">Next up</span>
+  {%- if next -%}
+    <span class="mw-l mw-b">{{ next.label }}{% if next.sep %} <span class="mw-chip">SEP</span>{% endif %}</span>
+    <span>{{ next.when }}{% if next.kind == "earn" and next.eps %} <span class="mw-s">est {{ next.eps }}</span>{% endif %}</span>
+  {%- else -%}
+    <span class="mw-l mw-b">Week complete</span>
+  {%- endif -%}
+</div>
+{% endtemplate %}
+
+{% template mw_title %}
+<div class="title_bar">
+  <span class="title">Macro Week</span>
+  <span class="instance">{{ week_label }}{% if week_label %} | {% endif %}ET{% if macro_ok == false %} | macro data unavailable{% endif %}</span>
+</div>
+{% endtemplate %}

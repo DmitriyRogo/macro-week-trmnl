@@ -1,0 +1,11 @@
+<div class="layout">
+  <div class="mw">
+    {% render "mw_next", next: next %}
+    <div class="mw-panel">
+      {%- for ev in upcoming offset: 1 limit: 3 -%}
+        {%- render "mw_row", ev: ev -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+{% render "mw_title", week_label: week_label, macro_ok: macro_ok %}

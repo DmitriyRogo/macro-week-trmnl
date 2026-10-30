@@ -1,0 +1,21 @@
+<div class="layout">
+  <div class="mw">
+    <div class="mw-panels">
+      <div class="mw-panel">
+        <span class="mw-kicker">Up next</span>
+        {%- for ev in upcoming limit: 4 -%}
+          {%- render "mw_row", ev: ev -%}
+        {%- endfor -%}
+        {%- if upcoming.size == 0 -%}<span class="mw-note">{% if upcoming == nil %}Data unavailable{% else %}Week complete{% endif %}</span>{%- endif -%}
+      </div>
+      <div class="mw-panel">
+        <span class="mw-kicker">Latest results</span>
+        {%- for ev in latest limit: 4 -%}
+          {%- render "mw_row", ev: ev -%}
+        {%- endfor -%}
+        {%- if latest.size == 0 -%}<span class="mw-note">No results yet this week</span>{%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+{% render "mw_title", week_label: week_label, macro_ok: macro_ok %}
