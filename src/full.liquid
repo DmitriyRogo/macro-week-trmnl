@@ -52,7 +52,16 @@
               {%- for ev in d.earnings limit: d.full_earnings -%}
                 {%- render "mw_ev", ev: ev -%}
               {%- endfor -%}
-              {%- if d.full_more > 0 -%}<div class="mw-s mw-note">{% if d.full_earnings == 0 %}{{ d.full_more }} reporting{% else %}+{{ d.full_more }} more{% endif %}</div>{%- endif -%}
+              {%- comment -%} Big screens have room for the ones the server's 800x480 estimate cut. {%- endcomment -%}
+              {%- if d.full_earnings < d.earnings.size -%}
+                <div class="mw-tall">
+                  {%- for ev in d.earnings offset: d.full_earnings -%}
+                    {%- render "mw_ev", ev: ev -%}
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
+              {%- if d.full_more > 0 -%}<div class="mw-s mw-note mw-short">{% if d.full_earnings == 0 %}{{ d.full_more }} reporting{% else %}+{{ d.full_more }} more{% endif %}</div>{%- endif -%}
+              {%- if d.earnings_more > 0 -%}<div class="mw-s mw-note mw-tall">+{{ d.earnings_more }} more</div>{%- endif -%}
             {%- endif -%}
             {%- if d.events.size == 0 and d.earnings.size == 0 -%}<div class="mw-s mw-note">Quiet day</div>{%- endif -%}
           </div>

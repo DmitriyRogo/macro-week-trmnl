@@ -50,6 +50,17 @@
   .mw-row__name { overflow: hidden; text-overflow: ellipsis; }
   .mw-row--major .mw-row__name, .mw-row--earn .mw-row__name, .mw-row--fomc .mw-row__name { font-weight: 700; }
   .mw-row__end { margin-left: auto; }
+  /* Screen sizes. Default is TRMNL OG landscape (800x480). */
+  .mw-tall { display: none; }
+  .screen--lg .mw-tall { display: flex; flex-direction: column; gap: 4px; }
+  .screen--lg .mw-short { display: none; }
+  /* OG portrait: columns are too narrow for a name and time on one line. */
+  .screen--portrait:not(.screen--lg) .mw-ev__top { flex-wrap: wrap; }
+  .screen--portrait .view--half_vertical .mw-row, .screen--portrait .view--quadrant .mw-row { flex-wrap: wrap; white-space: normal; }
+  .screen--portrait .view--half_vertical .mw-row__name, .screen--portrait .view--quadrant .mw-row__name { overflow: visible; }
+  .screen--portrait .view--half_vertical .mw-panel { flex: 0 0 auto; }
+  .screen--portrait:not(.screen--lg) .view--half_vertical .title_bar .title, .screen--portrait:not(.screen--lg) .view--quadrant .title_bar .title { display: none; }
+  .screen--portrait .view--half_horizontal .mw-panels { align-items: stretch; }
   .mw-next { border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto; }
 </style>
 
