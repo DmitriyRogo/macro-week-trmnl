@@ -1,0 +1,588 @@
+{
+ "generated_at": "2026-11-01T01:59:41.965Z",
+ "today": "2026-10-30",
+ "week_label": "Oct 26 - 30",
+ "scope": "all_tracked_releases",
+ "group": "market_leaders",
+ "tickers": [],
+ "zone": "eastern",
+ "tz_label": "ET",
+ "auctions_ok": true,
+ "macro_ok": true,
+ "earnings_ok": true,
+ "next": null,
+ "latest": [
+  {
+   "sep": false,
+   "eps": "4.12",
+   "result": {
+    "value": "4.23",
+    "unit": "EPS",
+    "prev": "4.12",
+    "verdict": "beat",
+    "rev": {
+     "value": "113.2B",
+     "verdict": "beat"
+    }
+   },
+   "verdict": "beat",
+   "no_result": false,
+   "kind": "earn",
+   "label": "XOM",
+   "time": "BMO",
+   "major": false,
+   "date": "2026-10-30",
+   "dow": "Fri",
+   "is_today": true,
+   "status": "past"
+  },
+  {
+   "sep": false,
+   "eps": "2.00",
+   "result": {
+    "value": "1.89",
+    "unit": "EPS",
+    "prev": "2.00",
+    "verdict": "miss",
+    "rev": {
+     "value": "201.9B",
+     "verdict": "miss"
+    }
+   },
+   "verdict": "miss",
+   "no_result": false,
+   "kind": "earn",
+   "label": "AMZN",
+   "time": "AMC",
+   "major": false,
+   "date": "2026-10-29",
+   "dow": "Thu",
+   "is_today": false,
+   "status": "past"
+  },
+  {
+   "sep": false,
+   "eps": null,
+   "result": {
+    "value": "4.894%",
+    "unit": "yield",
+    "prev": null,
+    "cover": "2.46x",
+    "dir": null
+   },
+   "verdict": null,
+   "no_result": false,
+   "kind": "auction",
+   "label": "7Y Auction",
+   "time": "1:00",
+   "major": false,
+   "date": "2026-10-29",
+   "dow": "Thu",
+   "is_today": false,
+   "status": "past"
+  },
+  {
+   "sep": false,
+   "eps": null,
+   "result": {
+    "value": "194K",
+    "unit": "initial",
+    "prev": "195K",
+    "dir": "down"
+   },
+   "verdict": null,
+   "no_result": false,
+   "kind": "macro",
+   "label": "Jobless Claims",
+   "time": "8:30",
+   "major": false,
+   "date": "2026-10-29",
+   "dow": "Thu",
+   "is_today": false,
+   "status": "past"
+  },
+  {
+   "sep": false,
+   "eps": null,
+   "result": {
+    "value": "+0.5%",
+    "unit": "m/m",
+    "prev": "+0.3%",
+    "dir": "up",
+    "extra": {
+     "label": "core",
+     "value": "+0.3%"
+    }
+   },
+   "verdict": null,
+   "no_result": false,
+   "kind": "macro",
+   "label": "PCE",
+   "time": "8:30",
+   "major": true,
+   "date": "2026-10-29",
+   "dow": "Thu",
+   "is_today": false,
+   "status": "past"
+  },
+  {
+   "sep": false,
+   "eps": null,
+   "result": {
+    "value": "+3.4%",
+    "unit": "q/q ann.",
+    "prev": "+2.2%",
+    "dir": "up"
+   },
+   "verdict": null,
+   "no_result": false,
+   "kind": "macro",
+   "label": "GDP",
+   "time": "8:30",
+   "major": true,
+   "date": "2026-10-29",
+   "dow": "Thu",
+   "is_today": false,
+   "status": "past"
+  }
+ ],
+ "upcoming": [],
+ "days": [
+  {
+   "date": "2026-10-26",
+   "dow": "Mon",
+   "day": 26,
+   "is_today": false,
+   "status": "past",
+   "market": "open",
+   "events": [
+    {
+     "sep": false,
+     "eps": null,
+     "result": {
+      "value": "4.708%",
+      "unit": "yield",
+      "prev": null,
+      "cover": "2.59x",
+      "dir": null
+     },
+     "verdict": null,
+     "no_result": false,
+     "kind": "auction",
+     "label": "2Y Auction",
+     "time": "1:00",
+     "major": false,
+     "date": "2026-10-26",
+     "dow": "Mon",
+     "is_today": false,
+     "status": "past"
+    }
+   ],
+   "earnings": [],
+   "earnings_more": 0,
+   "full_earnings": 0,
+   "full_more": 0
+  },
+  {
+   "date": "2026-10-27",
+   "dow": "Tue",
+   "day": 27,
+   "is_today": false,
+   "status": "past",
+   "market": "open",
+   "events": [
+    {
+     "sep": false,
+     "eps": null,
+     "result": {
+      "value": "4.845%",
+      "unit": "yield",
+      "prev": null,
+      "cover": "2.33x",
+      "dir": null
+     },
+     "verdict": null,
+     "no_result": false,
+     "kind": "auction",
+     "label": "5Y Auction",
+     "time": "1:00",
+     "major": false,
+     "date": "2026-10-27",
+     "dow": "Tue",
+     "is_today": false,
+     "status": "past"
+    }
+   ],
+   "earnings": [
+    {
+     "sep": false,
+     "eps": "3.50",
+     "result": {
+      "value": "3.48",
+      "unit": "EPS",
+      "prev": "3.50",
+      "verdict": "miss",
+      "rev": {
+       "value": "12.1B",
+       "verdict": "miss"
+      }
+     },
+     "verdict": "miss",
+     "no_result": false,
+     "kind": "earn",
+     "label": "V",
+     "time": "AMC",
+     "major": false,
+     "date": "2026-10-27",
+     "dow": "Tue",
+     "is_today": false,
+     "status": "past"
+    }
+   ],
+   "earnings_more": 0,
+   "full_earnings": 1,
+   "full_more": 0
+  },
+  {
+   "date": "2026-10-28",
+   "dow": "Wed",
+   "day": 28,
+   "is_today": false,
+   "status": "past",
+   "market": "open",
+   "events": [
+    {
+     "sep": false,
+     "eps": null,
+     "result": {
+      "value": "HOLD",
+      "unit": "3.75-4.00%",
+      "prev": null,
+      "dir": "flat"
+     },
+     "verdict": null,
+     "no_result": false,
+     "kind": "fomc",
+     "label": "FOMC",
+     "time": "2:00",
+     "major": true,
+     "date": "2026-10-28",
+     "dow": "Wed",
+     "is_today": false,
+     "status": "past"
+    }
+   ],
+   "earnings": [
+    {
+     "sep": false,
+     "eps": "4.82",
+     "result": {
+      "value": "4.89",
+      "unit": "EPS",
+      "prev": "4.82",
+      "verdict": "beat",
+      "rev": {
+       "value": "92.3B",
+       "verdict": "inline"
+      }
+     },
+     "verdict": "beat",
+     "no_result": false,
+     "kind": "earn",
+     "label": "MSFT",
+     "time": "AMC",
+     "major": false,
+     "date": "2026-10-28",
+     "dow": "Wed",
+     "is_today": false,
+     "status": "past"
+    },
+    {
+     "sep": false,
+     "eps": "3.11",
+     "result": {
+      "value": "2.12",
+      "unit": "EPS",
+      "prev": "3.11",
+      "verdict": "miss",
+      "rev": {
+       "value": "111.2B",
+       "verdict": "miss"
+      }
+     },
+     "verdict": "miss",
+     "no_result": false,
+     "kind": "earn",
+     "label": "GOOGL",
+     "time": "AMC",
+     "major": false,
+     "date": "2026-10-28",
+     "dow": "Wed",
+     "is_today": false,
+     "status": "past"
+    },
+    {
+     "sep": false,
+     "eps": "3.52",
+     "result": {
+      "value": "3.74",
+      "unit": "EPS",
+      "prev": "3.52",
+      "verdict": "beat",
+      "rev": {
+       "value": "22.9B",
+       "verdict": "miss"
+      }
+     },
+     "verdict": "beat",
+     "no_result": false,
+     "kind": "earn",
+     "label": "FDX",
+     "time": "AMC",
+     "major": false,
+     "date": "2026-10-28",
+     "dow": "Wed",
+     "is_today": false,
+     "status": "past"
+    }
+   ],
+   "earnings_more": 0,
+   "full_earnings": 3,
+   "full_more": 0
+  },
+  {
+   "date": "2026-10-29",
+   "dow": "Thu",
+   "day": 29,
+   "is_today": false,
+   "status": "past",
+   "market": "open",
+   "events": [
+    {
+     "sep": false,
+     "eps": null,
+     "result": {
+      "value": "+3.4%",
+      "unit": "q/q ann.",
+      "prev": "+2.2%",
+      "dir": "up"
+     },
+     "verdict": null,
+     "no_result": false,
+     "kind": "macro",
+     "label": "GDP",
+     "time": "8:30",
+     "major": true,
+     "date": "2026-10-29",
+     "dow": "Thu",
+     "is_today": false,
+     "status": "past"
+    },
+    {
+     "sep": false,
+     "eps": null,
+     "result": {
+      "value": "+0.5%",
+      "unit": "m/m",
+      "prev": "+0.3%",
+      "dir": "up",
+      "extra": {
+       "label": "core",
+       "value": "+0.3%"
+      }
+     },
+     "verdict": null,
+     "no_result": false,
+     "kind": "macro",
+     "label": "PCE",
+     "time": "8:30",
+     "major": true,
+     "date": "2026-10-29",
+     "dow": "Thu",
+     "is_today": false,
+     "status": "past"
+    },
+    {
+     "sep": false,
+     "eps": null,
+     "result": {
+      "value": "194K",
+      "unit": "initial",
+      "prev": "195K",
+      "dir": "down"
+     },
+     "verdict": null,
+     "no_result": false,
+     "kind": "macro",
+     "label": "Jobless Claims",
+     "time": "8:30",
+     "major": false,
+     "date": "2026-10-29",
+     "dow": "Thu",
+     "is_today": false,
+     "status": "past"
+    },
+    {
+     "sep": false,
+     "eps": null,
+     "result": {
+      "value": "4.894%",
+      "unit": "yield",
+      "prev": null,
+      "cover": "2.46x",
+      "dir": null
+     },
+     "verdict": null,
+     "no_result": false,
+     "kind": "auction",
+     "label": "7Y Auction",
+     "time": "1:00",
+     "major": false,
+     "date": "2026-10-29",
+     "dow": "Thu",
+     "is_today": false,
+     "status": "past"
+    }
+   ],
+   "earnings": [
+    {
+     "sep": false,
+     "eps": "6.61",
+     "result": {
+      "value": "7.48",
+      "unit": "EPS",
+      "prev": "6.61",
+      "verdict": "beat",
+      "rev": {
+       "value": "24.4B",
+       "verdict": "beat"
+      }
+     },
+     "verdict": "beat",
+     "no_result": false,
+     "kind": "earn",
+     "label": "LLY",
+     "time": "BMO",
+     "major": false,
+     "date": "2026-10-29",
+     "dow": "Thu",
+     "is_today": false,
+     "status": "past"
+    },
+    {
+     "sep": false,
+     "eps": "5.32",
+     "result": {
+      "value": "5.31",
+      "unit": "EPS",
+      "prev": "5.32",
+      "verdict": "miss",
+      "rev": {
+       "value": "9.8B",
+       "verdict": "miss"
+      }
+     },
+     "verdict": "miss",
+     "no_result": false,
+     "kind": "earn",
+     "label": "MA",
+     "time": "BMO",
+     "major": false,
+     "date": "2026-10-29",
+     "dow": "Thu",
+     "is_today": false,
+     "status": "past"
+    },
+    {
+     "sep": false,
+     "eps": "7.16",
+     "result": {
+      "value": "7.20",
+      "unit": "EPS",
+      "prev": "7.16",
+      "verdict": "beat",
+      "rev": {
+       "value": "20.7B",
+       "verdict": "inline"
+      }
+     },
+     "verdict": "beat",
+     "no_result": false,
+     "kind": "earn",
+     "label": "CAT",
+     "time": "BMO",
+     "major": false,
+     "date": "2026-10-29",
+     "dow": "Thu",
+     "is_today": false,
+     "status": "past"
+    },
+    {
+     "sep": false,
+     "eps": "2.00",
+     "result": {
+      "value": "1.89",
+      "unit": "EPS",
+      "prev": "2.00",
+      "verdict": "miss",
+      "rev": {
+       "value": "201.9B",
+       "verdict": "miss"
+      }
+     },
+     "verdict": "miss",
+     "no_result": false,
+     "kind": "earn",
+     "label": "AMZN",
+     "time": "AMC",
+     "major": false,
+     "date": "2026-10-29",
+     "dow": "Thu",
+     "is_today": false,
+     "status": "past"
+    }
+   ],
+   "earnings_more": 0,
+   "full_earnings": 1,
+   "full_more": 3
+  },
+  {
+   "date": "2026-10-30",
+   "dow": "Fri",
+   "day": 30,
+   "is_today": true,
+   "status": "today",
+   "market": "open",
+   "events": [],
+   "earnings": [
+    {
+     "sep": false,
+     "eps": "4.12",
+     "result": {
+      "value": "4.23",
+      "unit": "EPS",
+      "prev": "4.12",
+      "verdict": "beat",
+      "rev": {
+       "value": "113.2B",
+       "verdict": "beat"
+      }
+     },
+     "verdict": "beat",
+     "no_result": false,
+     "kind": "earn",
+     "label": "XOM",
+     "time": "BMO",
+     "major": false,
+     "date": "2026-10-30",
+     "dow": "Fri",
+     "is_today": true,
+     "status": "past"
+    }
+   ],
+   "earnings_more": 0,
+   "full_earnings": 1,
+   "full_more": 0
+  }
+ ]
+}
